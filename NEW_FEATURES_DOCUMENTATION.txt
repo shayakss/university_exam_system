@@ -1,0 +1,704 @@
+# NEW FEATURES ADDED TO UNIVERSITY EXAM SYSTEM
+## Comprehensive Feature Documentation
+
+**Version:** 2.0.0  
+**Date:** December 2, 2025  
+**Total New Features:** 14 Major Features
+
+---
+
+## 📋 TABLE OF CONTENTS
+
+1. [Attendance Tracking System](#1-attendance-tracking-system)
+2. [Timetable & Scheduling](#2-timetable--scheduling)
+3. [Assignment Management](#3-assignment-management)
+4. [Student Promotion System](#4-student-promotion-system)
+5. [ID Card Generation](#5-id-card-generation)
+6. [Alumni Database](#6-alumni-database)
+7. [Dark/Light Mode Theme](#7-darklight-mode-theme)
+8. [Interactive Analytics Dashboard](#8-interactive-analytics-dashboard)
+9. [Customizable Report Builder](#9-customizable-report-builder)
+10. [Role-Based Access Control (RBAC)](#10-role-based-access-control-rbac)
+11. [Audit Logging](#11-audit-logging)
+12. [Database Archiving](#12-database-archiving)
+13. [Cloud Backup Integration](#13-cloud-backup-integration)
+14. [AI Performance Insights](#14-ai-performance-insights)
+
+---
+
+## 1. ATTENDANCE TRACKING SYSTEM
+
+### What It Does
+Comprehensive attendance management for both students and teachers with automated percentage calculations and low-attendance alerts.
+
+### Features
+- **Daily Attendance Marking**: Mark attendance as Present, Absent, Leave, or Late
+- **Bulk Attendance**: Mark attendance for entire class at once
+- **Course-wise Tracking**: Track attendance per subject/course
+- **Automatic Percentage Calculation**: Real-time attendance percentage
+- **Low Attendance Alerts**: Automatic alerts for students below 75%
+- **Attendance Reports**: Generate detailed reports by date range, department, semester
+- **Teacher Attendance**: Separate attendance tracking for faculty
+
+### Benefits
+- **Improved Accountability**: Students and teachers are more accountable
+- **Early Intervention**: Identify students with poor attendance before it's too late
+- **Automated Calculations**: No manual percentage calculations needed
+- **Compliance**: Meet university attendance requirements automatically
+- **Data-Driven Decisions**: Use attendance data for promotion eligibility
+
+### How to Use
+1. Navigate to **Attendance Management** from the main menu
+2. Select department and semester
+3. Choose date and course
+4. Mark attendance for students (bulk or individual)
+5. View attendance reports and statistics
+6. Check low-attendance alerts
+
+### Technical Details
+- **Database Tables**: `student_attendance`, `teacher_attendance`
+- **Controller**: `attendance_controller.py`
+- **UI Component**: `ui/attendance_management.py`
+
+---
+
+## 2. TIMETABLE & SCHEDULING
+
+### What It Does
+Visual timetable creation with automatic conflict detection for classes and exams.
+
+### Features
+- **Class Schedule Management**: Create weekly class schedules
+- **Exam Schedule Management**: Schedule mid-terms, finals, quizzes
+- **Conflict Detection**: Automatically detects teacher/room conflicts
+- **Time Slot Management**: Define custom time slots
+- **Room Assignment**: Assign classrooms to lectures
+- **Multiple Views**: View by day, week, teacher, or student
+- **Printable Timetables**: Export to PDF for printing
+
+### Benefits
+- **No Double Booking**: Conflict detection prevents scheduling errors
+- **Time Optimization**: Efficiently utilize teachers and classrooms
+- **Student Convenience**: Students can view their complete schedule
+- **Exam Planning**: Plan exam schedules without conflicts
+- **Resource Management**: Track classroom and teacher availability
+
+### How to Use
+1. Go to **Timetable Management**
+2. Select **Class Schedule** or **Exam Schedule**
+3. Choose course, teacher, day, and time
+4. Assign room number
+5. System checks for conflicts automatically
+6. Save schedule if no conflicts
+7. View and print timetables
+
+### Technical Details
+- **Database Tables**: `class_schedule`, `exam_schedule`
+- **Controller**: `timetable_controller.py`
+- **UI Component**: `ui/timetable_management.py`
+- **Conflict Detection**: Checks teacher availability and room booking
+
+---
+
+## 3. ASSIGNMENT MANAGEMENT
+
+### What It Does
+Complete assignment lifecycle management from creation to grading with automatic submission tracking.
+
+### Features
+- **Assignment Creation**: Teachers create assignments with due dates
+- **Auto-Submission Tracking**: System creates pending submissions for all students
+- **Late Detection**: Automatically marks late submissions
+- **File Upload Support**: Students can attach assignment files
+- **Grading System**: Teachers grade and provide feedback
+- **Submission Statistics**: Track pending/submitted/late assignments
+- **Email Notifications**: (Framework ready for email alerts)
+
+### Benefits
+- **Organized Workflow**: Streamlined assignment management
+- **No Lost Assignments**: All assignments tracked in database
+- **Automatic Reminders**: Students see pending assignments
+- **Fair Grading**: Transparent grading with remarks
+- **Performance Tracking**: Monitor assignment completion rates
+- **Time Management**: Students see all due dates in one place
+
+### How to Use
+**For Teachers:**
+1. Navigate to **Assignment Management**
+2. Click **Create Assignment**
+3. Enter title, description, due date, total marks
+4. Select course
+5. View submissions and grade them
+
+**For Students:**
+1. View **My Assignments**
+2. See pending, submitted, and graded assignments
+3. Submit assignments before due date
+4. View grades and feedback
+
+### Technical Details
+- **Database Tables**: `assignments`, `assignment_submissions`
+- **Controller**: `assignment_controller.py`
+- **UI Component**: `ui/assignment_management.py`
+
+---
+
+## 4. STUDENT PROMOTION SYSTEM
+
+### What It Does
+Automated student promotion to next semester based on configurable eligibility criteria.
+
+### Features
+- **Eligibility Checking**: Automatic check based on CGPA, F grades, attendance
+- **Bulk Promotion**: Promote entire semester/department at once
+- **Promotion Rules**: Configurable promotion criteria
+- **Promotion History**: Track all promotions with dates
+- **Ineligible Student Reports**: List students not eligible with reasons
+- **Manual Override**: Admin can manually promote if needed
+
+### Benefits
+- **Automation**: No manual semester updates needed
+- **Fair Process**: Consistent promotion criteria for all students
+- **Time Saving**: Bulk promotion saves hours of work
+- **Transparency**: Students know promotion requirements
+- **Historical Records**: Complete promotion history maintained
+- **Error Prevention**: Prevents promoting ineligible students
+
+### How to Use
+1. Go to **Student Promotion**
+2. Select department and current semester
+3. Click **Check Eligibility**
+4. Review eligible and ineligible students
+5. Click **Promote Eligible Students**
+6. System updates semester for all eligible students
+7. View promotion history
+
+### Technical Details
+- **Database Tables**: `promotion_rules`, `promotion_history`
+- **Controller**: `promotion_controller.py`
+- **UI Component**: `ui/student_promotion.py`
+- **Default Rule**: CGPA ≥ 2.0, No F grades, Attendance ≥ 75%
+
+---
+
+## 5. ID CARD GENERATION
+
+### What It Does
+Generate professional ID cards for students and staff with QR codes containing encoded information.
+
+### Features
+- **Student ID Cards**: Generate cards with photo, roll number, department
+- **Staff ID Cards**: Separate cards for teachers and staff
+- **QR Code Integration**: Embedded QR codes with student/staff data
+- **Card Number Generation**: Unique card numbers (STU2025000001 format)
+- **Expiry Dates**: Configurable validity period (4 years for students)
+- **Batch Generation**: Generate cards for multiple students
+- **PDF Export**: Printable ID card templates
+- **Card Verification**: Scan QR code to verify authenticity
+
+### Benefits
+- **Professional Identity**: Official university ID cards
+- **Security**: QR codes prevent forgery
+- **Quick Verification**: Scan QR code to verify student/staff
+- **Automated Process**: No manual card creation needed
+- **Tracking**: All issued cards tracked in database
+- **Expiry Management**: Know when cards need renewal
+
+### How to Use
+1. Navigate to **ID Card Generator**
+2. Select card type (Student/Teacher/Staff)
+3. Choose individual or batch generation
+4. Upload photo (optional)
+5. Click **Generate ID Card**
+6. Preview card design
+7. Print or export to PDF
+
+### Technical Details
+- **Database Table**: `id_cards`
+- **Controller**: `id_card_controller.py`
+- **UI Component**: `ui/id_card_generator.py`
+- **QR Library**: `qrcode` Python package
+- **QR Data**: JSON format with ID, name, roll number, department
+
+---
+
+## 6. ALUMNI DATABASE
+
+### What It Does
+Comprehensive alumni management system to track graduates and their career progress.
+
+### Features
+- **Graduate Migration**: Move graduated students to alumni database
+- **Employment Tracking**: Record current and past employment
+- **Contact Management**: Maintain updated contact information
+- **Graduation Records**: Store final CGPA, grade, graduation date
+- **Alumni Search**: Search by year, department, employment status
+- **Employment History**: Track career progression
+- **Alumni Statistics**: Placement rates, average salaries, top employers
+- **Alumni Directory**: Exportable directory of all alumni
+
+### Benefits
+- **Career Tracking**: Monitor graduate success
+- **Placement Statistics**: Calculate placement percentages
+- **Networking**: Connect current students with alumni
+- **University Reputation**: Track alumni achievements
+- **Data Organization**: Separate active students from graduates
+- **Accreditation**: Alumni data for accreditation reports
+
+### How to Use
+1. Go to **Alumni Management**
+2. Select graduated student
+3. Click **Move to Alumni**
+4. Enter graduation details (year, CGPA, grade)
+5. Add employment information
+6. Update contact details
+7. Search and view alumni records
+8. Generate alumni reports
+
+### Technical Details
+- **Database Tables**: `alumni`, `alumni_employment`
+- **Controller**: `alumni_controller.py`
+- **UI Component**: `ui/alumni_management.py`
+- **Status Types**: Employed, Self-Employed, Higher Studies, Unemployed
+
+---
+
+## 7. DARK/LIGHT MODE THEME
+
+### What It Does
+Modern theme switching between light and dark modes with user preference persistence.
+
+### Features
+- **Light Mode**: Clean, bright interface (default)
+- **Dark Mode**: Eye-friendly dark theme for low-light environments
+- **One-Click Toggle**: Switch themes instantly
+- **User Preferences**: Theme choice saved per user
+- **Consistent Styling**: All UI elements adapt to theme
+- **Professional Colors**: Carefully chosen color schemes
+
+### Benefits
+- **Eye Comfort**: Dark mode reduces eye strain
+- **User Choice**: Personalize interface appearance
+- **Modern UI**: Contemporary design aesthetic
+- **Accessibility**: Better visibility in different lighting
+- **Battery Saving**: Dark mode saves battery on OLED screens
+- **Professional Look**: Polished, modern appearance
+
+### How to Use
+1. Click **Theme Toggle** button in toolbar
+2. Or go to **Settings** → **Appearance**
+3. Select **Light** or **Dark** mode
+4. Theme applies immediately
+5. Preference saved automatically
+
+### Technical Details
+- **Database Table**: `user_preferences`
+- **Utility**: `utils/theme_manager.py`
+- **Stylesheets**: Separate CSS for light and dark themes
+- **Persistence**: Theme saved per user in database
+
+---
+
+## 8. INTERACTIVE ANALYTICS DASHBOARD
+
+### What It Does
+Replace static numbers with interactive charts and graphs for better data visualization.
+
+### Features
+- **Pie Charts**: Student distribution by department
+- **Bar Charts**: Pass/fail rates, grade distribution
+- **Line Charts**: Performance trends over time
+- **Attendance Charts**: Department-wise attendance rates
+- **Interactive Graphs**: Hover for details, zoom, pan
+- **Real-time Updates**: Charts update with live data
+- **Multiple Views**: Switch between chart types
+- **Export Charts**: Save charts as images
+
+### Benefits
+- **Visual Insights**: Understand data at a glance
+- **Trend Analysis**: Identify patterns and trends
+- **Better Decisions**: Data-driven decision making
+- **Presentations**: Use charts in reports and presentations
+- **Engagement**: Interactive charts are more engaging
+- **Comparison**: Easily compare departments and semesters
+
+### How to Use
+1. Open **Analytics Dashboard**
+2. View various charts and graphs
+3. Hover over chart elements for details
+4. Click chart legends to filter data
+5. Select department/semester filters
+6. Export charts for reports
+
+### Technical Details
+- **Controller**: `analytics_controller.py`
+- **UI Component**: `ui/analytics_dashboard.py`
+- **Libraries**: `matplotlib`, `plotly`
+- **Chart Types**: Pie, Bar, Line, Scatter
+
+---
+
+## 9. CUSTOMIZABLE REPORT BUILDER
+
+### What It Does
+Create custom reports by selecting specific columns, filters, and export formats.
+
+### Features
+- **Column Selection**: Choose which fields to include
+- **Multiple Filters**: Filter by department, semester, date range
+- **Report Templates**: Save frequently used report configurations
+- **Export Formats**: Excel, PDF, CSV
+- **Custom Formatting**: Choose fonts, colors, layouts
+- **Scheduled Reports**: (Framework for automated reports)
+- **Report Preview**: Preview before exporting
+
+### Benefits
+- **Flexibility**: Create exactly the report you need
+- **Time Saving**: Reuse report templates
+- **Professional Output**: Well-formatted exports
+- **Data Analysis**: Export data for further analysis
+- **Compliance**: Generate required reports for authorities
+- **Customization**: Different reports for different audiences
+
+### How to Use
+1. Navigate to **Report Builder**
+2. Select report type (Students, Marks, Attendance, etc.)
+3. Choose columns to include
+4. Apply filters (department, semester, dates)
+5. Preview report
+6. Export to Excel or PDF
+7. Save as template for future use
+
+### Technical Details
+- **UI Component**: `ui/report_builder.py`
+- **Export Libraries**: `openpyxl` (Excel), `reportlab` (PDF)
+- **Filters**: Department, Semester, Date Range, Status
+
+---
+
+## 10. ROLE-BASED ACCESS CONTROL (RBAC)
+
+### What It Does
+Create custom roles with specific permissions for fine-grained access control.
+
+### Features
+- **Custom Roles**: Create roles beyond Admin/Teacher/Student
+- **Granular Permissions**: 30+ individual permissions
+- **Permission Categories**: Students, Courses, Marks, Attendance, etc.
+- **Role Assignment**: Assign multiple roles to users
+- **Permission Checking**: System enforces permissions automatically
+- **Role Templates**: Pre-defined roles (HOD, Exam Coordinator)
+- **Permission Audit**: Track who has what permissions
+
+### Benefits
+- **Security**: Restrict access to sensitive features
+- **Flexibility**: Create roles for specific job functions
+- **Compliance**: Meet security and privacy requirements
+- **Delegation**: Assign specific responsibilities
+- **Accountability**: Know who can do what
+- **Scalability**: Easy to add new roles as needed
+
+### How to Use
+1. Go to **RBAC Editor** (Admin only)
+2. Click **Create Role**
+3. Enter role name and description
+4. Select permissions from checklist
+5. Save role
+6. Go to **User Management**
+7. Assign roles to users
+
+### Technical Details
+- **Database Tables**: `roles`, `permissions`, `role_permissions`, `user_roles`
+- **Controller**: `rbac_controller.py`
+- **UI Component**: `ui/rbac_editor.py`
+- **Permission Examples**: view_students, edit_marks, manage_users
+
+---
+
+## 11. AUDIT LOGGING
+
+### What It Does
+Comprehensive logging of all system actions for security, compliance, and troubleshooting.
+
+### Features
+- **Action Logging**: Log all create, update, delete operations
+- **User Tracking**: Record who performed each action
+- **Timestamp Recording**: Exact time of each action
+- **Before/After Values**: Store old and new values for updates
+- **IP Address Logging**: Record user IP addresses
+- **Search & Filter**: Find specific actions quickly
+- **Audit Reports**: Generate audit trail reports
+- **Log Retention**: Configurable log retention period
+
+### Benefits
+- **Security**: Detect unauthorized access or changes
+- **Accountability**: Know who changed what and when
+- **Compliance**: Meet audit requirements
+- **Troubleshooting**: Trace issues to specific actions
+- **Forensics**: Investigate security incidents
+- **Transparency**: Complete action history
+
+### How to Use
+1. Navigate to **Audit Viewer** (Admin only)
+2. View recent actions
+3. Filter by user, action type, date
+4. Search for specific actions
+5. View action details (before/after values)
+6. Export audit reports
+7. Configure log retention
+
+### Technical Details
+- **Database Table**: `audit_logs`
+- **Controller**: `audit_controller.py`
+- **UI Component**: `ui/audit_viewer.py`
+- **Logged Actions**: LOGIN, LOGOUT, CREATE, UPDATE, DELETE
+- **Automatic**: Logging happens automatically for all operations
+
+---
+
+## 12. DATABASE ARCHIVING
+
+### What It Does
+Archive old academic year data to improve performance while maintaining historical records.
+
+### Features
+- **Academic Year Archiving**: Archive entire year's data
+- **Selective Archiving**: Choose what to archive
+- **Archive Metadata**: Track what was archived and when
+- **Restore Capability**: Restore archived data if needed
+- **Storage Optimization**: Reduce main database size
+- **Archive Statistics**: View archive size and contents
+- **Permanent Deletion**: Delete archives after retention period
+
+### Benefits
+- **Performance**: Faster queries on smaller database
+- **Organization**: Separate current from historical data
+- **Storage Management**: Manage database growth
+- **Compliance**: Retain data for required period
+- **Backup**: Additional data backup layer
+- **Scalability**: System remains fast as data grows
+
+### How to Use
+1. Go to **Archive Manager** (Admin only)
+2. Select academic year to archive
+3. Preview data to be archived
+4. Click **Archive**
+5. System moves data to archive tables
+6. View archive metadata
+7. Restore if needed
+8. Delete old archives after retention period
+
+### Technical Details
+- **Database Tables**: `archived_students`, `archived_marks`, `archived_results`, `archive_metadata`
+- **Controller**: `archive_controller.py`
+- **UI Component**: `ui/archive_manager.py`
+- **Archive Criteria**: Inactive students, old academic years
+
+---
+
+## 13. CLOUD BACKUP INTEGRATION
+
+### What It Does
+Automatically backup database to cloud storage (Google Drive/Dropbox) for disaster recovery.
+
+### Features
+- **Cloud Providers**: Google Drive and Dropbox support
+- **Automatic Backups**: Schedule automatic cloud backups
+- **Manual Backup**: On-demand cloud backup
+- **Backup Frequency**: Configurable (daily, weekly, monthly)
+- **Backup History**: Track all cloud backups
+- **Local + Cloud**: Creates local backup then uploads
+- **Secure Storage**: Encrypted cloud storage
+- **Easy Restore**: Download and restore from cloud
+
+### Benefits
+- **Disaster Recovery**: Protect against hardware failure
+- **Off-site Backup**: Data safe even if building damaged
+- **Automation**: Set and forget automatic backups
+- **Accessibility**: Access backups from anywhere
+- **Redundancy**: Multiple backup copies
+- **Peace of Mind**: Know data is safe
+
+### How to Use
+1. Navigate to **Cloud Backup Settings**
+2. Select provider (Google Drive or Dropbox)
+3. Click **Authenticate** and login to cloud account
+4. Configure backup folder path
+5. Set automatic backup schedule
+6. Click **Backup Now** for immediate backup
+7. View backup history
+8. Download and restore if needed
+
+### Technical Details
+- **Database Table**: `backup_config`
+- **Controller**: `cloud_backup_controller.py`
+- **UI Component**: `ui/cloud_backup_settings.py`
+- **APIs**: Google Drive API, Dropbox API (framework ready)
+- **Note**: Actual cloud upload requires API credentials
+
+---
+
+## 14. AI PERFORMANCE INSIGHTS
+
+### What It Does
+AI-powered prediction of at-risk students with intervention recommendations.
+
+### Features
+- **Risk Score Calculation**: 0-100 risk score for each student
+- **Multi-Factor Analysis**: CGPA, attendance, failing grades, assignments
+- **At-Risk Student List**: Automatically identify struggling students
+- **Risk Levels**: Critical, High, Medium, Low
+- **Intervention Recommendations**: Specific actions to help students
+- **Performance Prediction**: Predict next semester CGPA
+- **Risk Factors**: Identify main causes of poor performance
+- **Department Insights**: Overall risk statistics
+
+### Benefits
+- **Early Intervention**: Help students before they fail
+- **Data-Driven**: Objective risk assessment
+- **Resource Allocation**: Focus help on highest-risk students
+- **Improved Retention**: Reduce dropout rates
+- **Proactive Support**: Don't wait for failure
+- **Measurable Impact**: Track intervention effectiveness
+
+### How to Use
+1. Open **AI Insights** dashboard
+2. View at-risk students list
+3. Click student for detailed risk analysis
+4. Review risk factors and scores
+5. See intervention recommendations
+6. Take action (counseling, tutoring, etc.)
+7. Monitor student progress
+8. View department-wide insights
+
+### Technical Details
+- **Controller**: `ai_insights_controller.py`
+- **UI Component**: `ui/ai_insights.py`
+- **Algorithm**: Weighted risk scoring (CGPA 40%, Attendance 30%, Failing Grades 20%, Assignments 10%)
+- **Future**: Can integrate scikit-learn for ML models
+- **Risk Threshold**: Default 40% (configurable)
+
+---
+
+## 🎯 SUMMARY OF BENEFITS
+
+### For Students
+- View complete timetable and exam schedule
+- Track attendance percentage
+- See pending assignments and due dates
+- Know promotion eligibility
+- Get official ID card with QR code
+- Access dark mode for comfortable viewing
+
+### For Teachers
+- Mark attendance quickly (bulk marking)
+- Create and grade assignments
+- View class schedules
+- Track student performance
+- Identify at-risk students
+- Generate custom reports
+
+### For Administrators
+- Automated student promotion
+- Comprehensive audit trail
+- Alumni database management
+- Cloud backup for disaster recovery
+- Custom roles and permissions
+- Interactive analytics dashboard
+- Database archiving for performance
+- AI insights for early intervention
+
+### For University
+- Improved data organization
+- Better security and compliance
+- Enhanced reporting capabilities
+- Professional ID cards
+- Alumni tracking for accreditation
+- Data-driven decision making
+- Reduced manual work
+- Modern, professional system
+
+---
+
+## 📊 TECHNICAL SUMMARY
+
+### New Database Tables: 22
+- student_attendance, teacher_attendance
+- class_schedule, exam_schedule
+- assignments, assignment_submissions
+- promotion_rules, promotion_history
+- id_cards
+- alumni, alumni_employment
+- roles, permissions, role_permissions, user_roles
+- audit_logs
+- archived_students, archived_marks, archived_results, archive_metadata
+- backup_config
+- user_preferences
+
+### New Controllers: 9
+- attendance_controller.py
+- timetable_controller.py
+- assignment_controller.py
+- promotion_controller.py
+- id_card_controller.py
+- alumni_controller.py
+- rbac_controller.py
+- audit_controller.py
+- archive_controller.py
+- cloud_backup_controller.py
+- analytics_controller.py
+- ai_insights_controller.py
+
+### New Dependencies: 4
+- qrcode[pil] - QR code generation
+- numpy - Numerical computing
+- scikit-learn - Machine learning (future use)
+- plotly - Interactive charts
+
+### Code Statistics
+- **Total Lines Added**: ~15,000+
+- **New Files Created**: 25+
+- **Database Schema Changes**: 22 new tables
+- **New Features**: 14 major features
+
+---
+
+## 🚀 GETTING STARTED
+
+### 1. Run Database Migration
+```bash
+python database/migrations/run_migration_v2.py
+```
+
+### 2. Install New Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run Application
+```bash
+python main.py
+```
+
+### 4. Explore New Features
+- Check the new menu items
+- Try dark mode toggle
+- View analytics dashboard
+- Create an assignment
+- Mark attendance
+- Generate an ID card
+
+---
+
+## 📞 SUPPORT
+
+For questions or issues with new features:
+- Check USER_GUIDE.md for detailed instructions
+- Review implementation_plan.md for technical details
+- Contact system administrator
+
+---
+
+**Developed by: Shayak Siraj**  
+**Version: 2.0.0**  
+**Date: December 2, 2025**
