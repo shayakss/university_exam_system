@@ -30,18 +30,35 @@ class AnalyticsController:
     def get_performance_trends(self, department_id: int = None, months: int = 12) -> List[Dict]:
         """Get performance trends over time"""
         try:
-            query = """
-                SELECT 
-                    strftime('%Y-%m', r.generated_at) as month,
-                    AVG(r.cgpa) as avg_cgpa,
-                    AVG(r.percentage) as avg_percentage,
-                    COUNT(DISTINCT r.student_id) as student_count,
-                    SUM(CASE WHEN r.status = 'Pass' THEN 1 ELSE 0 END) as pass_count,
-                    SUM(CASE WHEN r.status = 'Fail' THEN 1 ELSE 0 END) as fail_count
-                FROM results r
-                JOIN students s ON r.student_id = s.student_id
-                WHERE r.generated_at >= datetime('now', '-' || ? || ' months')
-            """
+            import config
+            
+            # Use MySQL-compatible syntax when using MySQL
+            if config.USE_MYSQL:
+                query = """
+                    SELECT 
+                        DATE_FORMAT(r.generated_at, '%%Y-%%m') as month,
+                        AVG(r.cgpa) as avg_cgpa,
+                        AVG(r.percentage) as avg_percentage,
+                        COUNT(DISTINCT r.student_id) as student_count,
+                        SUM(CASE WHEN r.status = 'Pass' THEN 1 ELSE 0 END) as pass_count,
+                        SUM(CASE WHEN r.status = 'Fail' THEN 1 ELSE 0 END) as fail_count
+                    FROM results r
+                    JOIN students s ON r.student_id = s.student_id
+                    WHERE r.generated_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+                """
+            else:
+                query = """
+                    SELECT 
+                        strftime('%Y-%m', r.generated_at) as month,
+                        AVG(r.cgpa) as avg_cgpa,
+                        AVG(r.percentage) as avg_percentage,
+                        COUNT(DISTINCT r.student_id) as student_count,
+                        SUM(CASE WHEN r.status = 'Pass' THEN 1 ELSE 0 END) as pass_count,
+                        SUM(CASE WHEN r.status = 'Fail' THEN 1 ELSE 0 END) as fail_count
+                    FROM results r
+                    JOIN students s ON r.student_id = s.student_id
+                    WHERE r.generated_at >= datetime('now', '-' || ? || ' months')
+                """
             params = [months]
             
             if department_id:
@@ -50,7 +67,8 @@ class AnalyticsController:
             
             query += " GROUP BY month ORDER BY month"
             
-            return db.execute_query(query, tuple(params))
+            result = db.execute_query(query, tuple(params))
+            return result if result else []
         except Exception as e:
             print(f"Error getting performance trends: {e}")
             return []

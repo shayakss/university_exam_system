@@ -18,13 +18,21 @@ import os
 class PDFGenerator:
     """Generates PDF marksheets"""
     
+    # Class-level font registration (only done once)
+    _fonts_registered = False
+    _fonts_available = False
+    
     def __init__(self):
         self._register_fonts()
         self.watermark_logo_path = None
 
-    def _register_fonts(self):
-        """Register custom fonts from Windows Fonts directory"""
-        self.fonts_registered = False
+    @classmethod
+    def _register_fonts(cls):
+        """Register custom fonts from Windows Fonts directory (cached at class level)"""
+        if cls._fonts_registered:
+            return
+        
+        cls._fonts_registered = True
         try:
             font_dir = r"C:\Windows\Fonts"
             # Bookman Old Style
@@ -41,9 +49,14 @@ class PDFGenerator:
                 pdfmetrics.registerFont(TTFont('TimesNewRoman', os.path.join(font_dir, 'times.ttf')))
                 pdfmetrics.registerFont(TTFont('TimesNewRoman-Bold', os.path.join(font_dir, 'timesbd.ttf')))
                 
-            self.fonts_registered = True
+            cls._fonts_available = True
         except Exception as e:
             print(f"Warning: Could not register fonts: {e}")
+    
+    @property
+    def fonts_registered(self):
+        """Check if fonts are available"""
+        return PDFGenerator._fonts_available
     
     def generate_marksheet(self, result_data: dict, output_path: str, university_data: dict = None) -> bool:
         """

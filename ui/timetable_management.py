@@ -126,6 +126,11 @@ class TimetableManagement(QWidget):
     
     def load_data(self):
         """Load initial data"""
+        if not hasattr(self, 'dept_combo'):
+            # For Student role, just load schedules without filters
+            self.load_class_schedules()
+            return
+            
         departments = department_controller.get_all_departments()
         self.dept_combo.clear()
         for dept in departments:
@@ -136,23 +141,28 @@ class TimetableManagement(QWidget):
     
     def load_courses_teachers(self):
         """Load courses and teachers based on selection"""
+        if not hasattr(self, 'dept_combo') or not hasattr(self, 'sem_combo'):
+            return
+            
         dept_id = self.dept_combo.currentData()
-        semester = int(self.sem_combo.currentText())
+        semester = int(self.sem_combo.currentText()) if self.sem_combo.currentText() else 1
         
         if not dept_id:
             return
             
         # Load courses
-        self.course_combo.clear()
-        courses = course_controller.get_courses_by_department(dept_id, semester)
-        for course in courses:
-            self.course_combo.addItem(course['course_name'], course['course_id'])
+        if hasattr(self, 'course_combo'):
+            self.course_combo.clear()
+            courses = course_controller.get_courses_by_department(dept_id, semester) or []
+            for course in courses:
+                self.course_combo.addItem(course['course_name'], course['course_id'])
             
         # Load teachers
-        self.teacher_combo.clear()
-        teachers = user_controller.get_users_by_role('Teacher')
-        for teacher in teachers:
-            self.teacher_combo.addItem(teacher['full_name'], teacher['user_id'])
+        if hasattr(self, 'teacher_combo'):
+            self.teacher_combo.clear()
+            teachers = user_controller.get_users_by_role('Teacher') or []
+            for teacher in teachers:
+                self.teacher_combo.addItem(teacher['full_name'], teacher['user_id'])
             
     def add_class_schedule(self):
         """Add new class schedule"""
@@ -181,23 +191,25 @@ class TimetableManagement(QWidget):
             
     def load_class_schedules(self):
         """Load all class schedules"""
-        dept_id = self.dept_combo.currentData()
-        semester = int(self.sem_combo.currentText())
+        # Get filter values if available
+        dept_id = self.dept_combo.currentData() if hasattr(self, 'dept_combo') else self.department_id
+        semester = int(self.sem_combo.currentText()) if hasattr(self, 'sem_combo') and self.sem_combo.currentText() else 1
         
-        schedules = timetable_controller.get_class_schedules(department_id=dept_id, semester=semester)
+        schedules = timetable_controller.get_class_schedules(department_id=dept_id, semester=semester) or []
         
         self.class_table.setRowCount(len(schedules))
         for row, sch in enumerate(schedules):
-            self.class_table.setItem(row, 0, QTableWidgetItem(sch['day_of_week']))
-            self.class_table.setItem(row, 1, QTableWidgetItem(f"{sch['start_time']} - {sch['end_time']}"))
-            self.class_table.setItem(row, 2, QTableWidgetItem(sch['course_name']))
-            self.class_table.setItem(row, 3, QTableWidgetItem(sch['teacher_name']))
-            self.class_table.setItem(row, 4, QTableWidgetItem(sch['room_number']))
-            self.class_table.setItem(row, 5, QTableWidgetItem(sch['department_name']))
+            self.class_table.setItem(row, 0, QTableWidgetItem(sch.get('day_of_week', '')))
+            self.class_table.setItem(row, 1, QTableWidgetItem(f"{sch.get('start_time', '')} - {sch.get('end_time', '')}"))
+            self.class_table.setItem(row, 2, QTableWidgetItem(sch.get('course_name', '') or ''))
+            self.class_table.setItem(row, 3, QTableWidgetItem(sch.get('teacher_name', '') or ''))
+            self.class_table.setItem(row, 4, QTableWidgetItem(sch.get('room_number', '') or ''))
+            self.class_table.setItem(row, 5, QTableWidgetItem(sch.get('department_name', '') or ''))
             
-            del_btn = QPushButton("🗑️")
-            del_btn.clicked.connect(lambda checked, sid=sch['schedule_id']: self.delete_schedule(sid))
-            self.class_table.setCellWidget(row, 6, del_btn)
+            if self.user_role in ['Admin', 'Teacher', 'DataEntry']:
+                del_btn = QPushButton("🗑️")
+                del_btn.clicked.connect(lambda checked, sid=sch['schedule_id']: self.delete_schedule(sid))
+                self.class_table.setCellWidget(row, 6, del_btn)
             
     def delete_schedule(self, schedule_id):
         """Delete a schedule"""
@@ -205,3 +217,4 @@ class TimetableManagement(QWidget):
         if reply == QMessageBox.Yes:
             timetable_controller.delete_class_schedule(schedule_id)
             self.load_class_schedules()
+

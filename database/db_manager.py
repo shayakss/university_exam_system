@@ -81,10 +81,16 @@ class DatabaseManager:
         self._connection.execute("PRAGMA foreign_keys = ON")
         self._connection.execute("PRAGMA busy_timeout = 30000")
         self._connection.execute("PRAGMA synchronous = NORMAL")
-        self._connection.execute("PRAGMA cache_size = -10000")
+        
+        # PERFORMANCE OPTIMIZATIONS
+        self._connection.execute("PRAGMA cache_size = -64000")  # 64MB cache
+        self._connection.execute("PRAGMA mmap_size = 268435456")  # 256MB memory-mapped I/O
+        self._connection.execute("PRAGMA temp_store = MEMORY")  # Store temp tables in RAM
+        self._connection.execute("PRAGMA page_size = 4096")  # Optimal page size
+        self._connection.execute("PRAGMA read_uncommitted = ON")  # Faster reads
         
         print(f"✓ SQLite connected: {config.DATABASE_PATH}")
-        print("✓ WAL mode enabled for better concurrency")
+        print("✓ WAL mode + Performance optimizations enabled")
     
     def get_connection(self):
         """Get the database connection, reconnecting if necessary"""

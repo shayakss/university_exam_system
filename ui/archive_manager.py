@@ -136,19 +136,21 @@ class ArchiveManagerPage(QWidget):
 
     def load_archives(self):
         """Load list of archives"""
-        archives = archive_controller.get_archive_metadata()
+        archives = archive_controller.get_archive_metadata() or []
         self.archives_table.setRowCount(len(archives))
         
-        self.year_combo.clear()
-        self.year_combo.addItem("Select Academic Year")
+        # Only clear year_combo if it exists (it's created in browse tab)
+        if hasattr(self, 'year_combo'):
+            self.year_combo.clear()
+            self.year_combo.addItem("Select Academic Year")
         
         for row, arc in enumerate(archives):
-            self.archives_table.setItem(row, 0, QTableWidgetItem(arc['academic_year']))
-            self.archives_table.setItem(row, 1, QTableWidgetItem(str(arc['archive_date'])))
-            self.archives_table.setItem(row, 2, QTableWidgetItem(arc['archived_by_name']))
-            self.archives_table.setItem(row, 3, QTableWidgetItem(str(arc['students_count'])))
+            self.archives_table.setItem(row, 0, QTableWidgetItem(arc.get('academic_year', '')))
+            self.archives_table.setItem(row, 1, QTableWidgetItem(str(arc.get('archive_date', ''))))
+            self.archives_table.setItem(row, 2, QTableWidgetItem(arc.get('archived_by_name', '') or ''))
+            self.archives_table.setItem(row, 3, QTableWidgetItem(str(arc.get('students_count', 0))))
             
-            total_records = arc['marks_count'] + arc['results_count']
+            total_records = (arc.get('marks_count', 0) or 0) + (arc.get('results_count', 0) or 0)
             self.archives_table.setItem(row, 4, QTableWidgetItem(str(total_records)))
             
             self.archives_table.setItem(row, 5, QTableWidgetItem("Archived"))
@@ -170,7 +172,8 @@ class ArchiveManagerPage(QWidget):
             
             self.archives_table.setCellWidget(row, 6, btn_widget)
             
-            self.year_combo.addItem(arc['academic_year'], arc['academic_year'])
+            if hasattr(self, 'year_combo'):
+                self.year_combo.addItem(arc.get('academic_year', ''), arc.get('academic_year'))
 
     def load_archived_data(self):
         """Load archived students for selected year"""
@@ -178,15 +181,15 @@ class ArchiveManagerPage(QWidget):
         if not year:
             return
             
-        students = archive_controller.get_archived_students(academic_year=year)
+        students = archive_controller.get_archived_students(academic_year=year) or []
         self.data_table.setRowCount(len(students))
         
         for row, stu in enumerate(students):
-            self.data_table.setItem(row, 0, QTableWidgetItem(stu['roll_number']))
-            self.data_table.setItem(row, 1, QTableWidgetItem(stu['name']))
-            self.data_table.setItem(row, 2, QTableWidgetItem(stu['department_name']))
-            self.data_table.setItem(row, 3, QTableWidgetItem(str(stu['semester'])))
-            self.data_table.setItem(row, 4, QTableWidgetItem(str(stu['archived_date'])))
+            self.data_table.setItem(row, 0, QTableWidgetItem(stu.get('roll_number', '')))
+            self.data_table.setItem(row, 1, QTableWidgetItem(stu.get('name', '')))
+            self.data_table.setItem(row, 2, QTableWidgetItem(stu.get('department_name', '') or ''))
+            self.data_table.setItem(row, 3, QTableWidgetItem(str(stu.get('semester', ''))))
+            self.data_table.setItem(row, 4, QTableWidgetItem(str(stu.get('archived_date', ''))))
 
     def show_create_archive_dialog(self):
         """Show dialog to create new archive"""

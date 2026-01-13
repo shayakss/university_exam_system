@@ -135,12 +135,15 @@ class ReportController:
             query += " AND s.department_id = ?"
             params.append(department_id)
             
-        query += " GROUP BY s.student_id ORDER BY s.roll_number"
+        query += " GROUP BY s.student_id, s.roll_number, s.name, d.department_name ORDER BY s.roll_number"
         
         results = db.execute_query(query, tuple(params))
         
         headers = ["Roll No", "Name", "Department", "Total Days", "Present", "Absent", "Late", "Percentage"]
         data = []
+        if not results:
+            return headers, data
+
         for r in results:
             total = r['total_days']
             present = r['present_days'] + r['late_days'] # Late counts as present usually

@@ -28,7 +28,7 @@ class AdvancedAnalyticsPage(QWidget):
         
         # Header
         header_layout = QHBoxLayout()
-        title = QLabel("📊 Advanced Analytics")
+        title = QLabel("\U0001F4CA Advanced Analytics")
         title.setStyleSheet("font-size: 24px; font-weight: bold; color: #2c3e50;")
         header_layout.addWidget(title)
         
@@ -48,7 +48,7 @@ class AdvancedAnalyticsPage(QWidget):
         if self.user_role == 'Teacher' and self.department_id:
             self.dept_combo.setEnabled(False)
         
-        refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn = QPushButton("\U0001F504 Refresh")
         refresh_btn.clicked.connect(self.refresh_charts)
         header_layout.addWidget(refresh_btn)
         
@@ -162,23 +162,28 @@ class AdvancedAnalyticsPage(QWidget):
         summary = analytics_controller.get_dashboard_summary()
         if summary:
             self.total_students_card.value_label.setText(str(summary.get('students', {}).get('total', 0)))
-            self.avg_cgpa_card.value_label.setText(f"{summary.get('performance', {}).get('avg_cgpa', 0):.2f}")
+            avg_cgpa = summary.get('performance', {}).get('avg_cgpa')
+            self.avg_cgpa_card.value_label.setText(f"{avg_cgpa:.2f}" if avg_cgpa else "0.00")
             
-            pass_rate = analytics_controller.get_pass_fail_rates(dept_id).get('pass_rate', 0)
+            pf_rates = analytics_controller.get_pass_fail_rates(dept_id)
+            pass_rate = pf_rates.get('pass_rate', 0) if pf_rates else 0
             self.pass_rate_card.value_label.setText(f"{pass_rate}%")
 
         # 1. Gender Distribution
-        dist = analytics_controller.get_student_distribution_by_department()
-        male = sum(d['male_count'] for d in dist)
-        female = sum(d['female_count'] for d in dist)
+        dist = analytics_controller.get_student_distribution_by_department() or []
+        male = sum(d.get('male_count', 0) or 0 for d in dist)
+        female = sum(d.get('female_count', 0) or 0 for d in dist)
         
         self.gender_canvas.axes.clear()
-        self.gender_canvas.axes.pie([male, female], labels=['Male', 'Female'], autopct='%1.1f%%', colors=['#3498db', '#e91e63'])
+        if male + female > 0:
+            self.gender_canvas.axes.pie([male, female], labels=['Male', 'Female'], autopct='%1.1f%%', colors=['#3498db', '#e91e63'])
+        else:
+            self.gender_canvas.axes.text(0.5, 0.5, "No Data", ha='center', va='center')
         self.gender_canvas.axes.set_title("Gender Distribution")
         self.gender_canvas.draw()
         
         # 2. Pass/Fail Rates
-        pf = analytics_controller.get_pass_fail_rates(dept_id)
+        pf = analytics_controller.get_pass_fail_rates(dept_id) or {}
         passed = pf.get('passed', 0) or 0
         failed = pf.get('failed', 0) or 0
         
@@ -186,29 +191,35 @@ class AdvancedAnalyticsPage(QWidget):
         if passed + failed > 0:
             self.pass_fail_canvas.axes.pie([passed, failed], labels=['Pass', 'Fail'], autopct='%1.1f%%', colors=['#2ecc71', '#e74c3c'])
         else:
-            self.pass_fail_canvas.axes.text(0.5, 0.5, "No Data", ha='center')
+            self.pass_fail_canvas.axes.text(0.5, 0.5, "No Data", ha='center', va='center')
         self.pass_fail_canvas.axes.set_title("Pass/Fail Ratio")
         self.pass_fail_canvas.draw()
         
         # 3. Grade Distribution
-        grades = analytics_controller.get_grade_distribution(dept_id)
-        labels = [g['grade'] for g in grades]
-        counts = [g['count'] for g in grades]
+        grades = analytics_controller.get_grade_distribution(dept_id) or []
+        labels = [g['grade'] for g in grades] if grades else []
+        counts = [g['count'] for g in grades] if grades else []
         
         self.grade_canvas.axes.clear()
-        self.grade_canvas.axes.bar(labels, counts, color='#9b59b6')
+        if labels and counts:
+            self.grade_canvas.axes.bar(labels, counts, color='#9b59b6')
+        else:
+            self.grade_canvas.axes.text(0.5, 0.5, "No Data", ha='center', va='center', transform=self.grade_canvas.axes.transAxes)
         self.grade_canvas.axes.set_title("Grade Distribution")
         self.grade_canvas.axes.set_xlabel("Grade")
         self.grade_canvas.axes.set_ylabel("Count")
         self.grade_canvas.draw()
         
         # 4. Trends
-        trends = analytics_controller.get_performance_trends(dept_id)
-        months = [t['month'] for t in trends]
-        cgpas = [t['avg_cgpa'] for t in trends]
+        trends = analytics_controller.get_performance_trends(dept_id) or []
         
         self.trend_canvas.axes.clear()
-        self.trend_canvas.axes.plot(months, cgpas, marker='o', color='#e67e22')
+        if trends:
+            months = [t['month'] for t in trends]
+            cgpas = [t['avg_cgpa'] or 0 for t in trends]
+            self.trend_canvas.axes.plot(months, cgpas, marker='o', color='#e67e22')
+        else:
+            self.trend_canvas.axes.text(0.5, 0.5, "No Data", ha='center', va='center', transform=self.trend_canvas.axes.transAxes)
         self.trend_canvas.axes.set_title("Average CGPA Trend")
         self.trend_canvas.axes.set_xlabel("Month")
         self.trend_canvas.axes.set_ylabel("CGPA")
@@ -216,12 +227,15 @@ class AdvancedAnalyticsPage(QWidget):
         self.trend_canvas.draw()
         
         # 5. Attendance
-        att = analytics_controller.get_attendance_statistics(dept_id)
-        depts = [a['department_name'] for a in att]
-        rates = [a['avg_attendance_rate'] for a in att]
+        att = analytics_controller.get_attendance_statistics(dept_id) or []
         
         self.attendance_canvas.axes.clear()
-        self.attendance_canvas.axes.barh(depts, rates, color='#1abc9c')
+        if att:
+            depts = [a['department_name'] for a in att]
+            rates = [a.get('avg_attendance_rate', 0) or 0 for a in att]
+            self.attendance_canvas.axes.barh(depts, rates, color='#1abc9c')
+        else:
+            self.attendance_canvas.axes.text(0.5, 0.5, "No Data", ha='center', va='center', transform=self.attendance_canvas.axes.transAxes)
         self.attendance_canvas.axes.set_title("Average Attendance by Department")
         self.attendance_canvas.axes.set_xlabel("Attendance %")
         self.attendance_canvas.draw()

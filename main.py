@@ -9,6 +9,42 @@ from controllers.auth_controller import auth
 from utils.security import hash_password
 from resources.styles.main_style import MAIN_STYLESHEET
 import config
+import matplotlib.axes
+import matplotlib.transforms as mtransforms
+
+# Global monkeypatch to permanently fix 'box_aspect' and 'fig_aspect' must be positive error
+def patch_matplotlib():
+    try:
+        # 1. Patch shrunk_to_aspect in transforms
+        _original_shrunk_to_aspect = mtransforms.BboxBase.shrunk_to_aspect
+        def _safe_shrunk_to_aspect(self, box_aspect, container=None, fig_aspect=1.0):
+            try:
+                if box_aspect <= 0 or fig_aspect <= 0:
+                    return container if container is not None else self
+            except Exception:
+                return container if container is not None else self
+                
+            try:
+                return _original_shrunk_to_aspect(self, box_aspect, container, fig_aspect)
+            except (ValueError, Exception):
+                return container if container is not None else self
+        
+        mtransforms.BboxBase.shrunk_to_aspect = _safe_shrunk_to_aspect
+        
+        # 2. Patch apply_aspect in Axes as a double safety measure
+        _original_apply_aspect = matplotlib.axes.Axes.apply_aspect
+        def _safe_apply_aspect(self, position=None):
+            try:
+                return _original_apply_aspect(self, position)
+            except ValueError:
+                return
+        matplotlib.axes.Axes.apply_aspect = _safe_apply_aspect
+        print("✓ Matplotlib stability patches applied")
+    except Exception as e:
+        print(f"⚠ Could not apply Matplotlib patches: {e}")
+
+# Apply patches immediately
+patch_matplotlib()
 
 
 def initialize_database():

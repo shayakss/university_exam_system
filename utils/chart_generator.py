@@ -7,6 +7,52 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtCore import QTimer
+
+
+class SafeFigureCanvas(FigureCanvas):
+    """A FigureCanvas that handles draw errors gracefully"""
+    
+    def __init__(self, figure):
+        super().__init__(figure)
+        self._drawing_enabled = False
+    
+    def enable_drawing(self):
+        """Enable drawing after widget is properly sized"""
+        self._drawing_enabled = True
+    
+    def draw(self):
+        """Override draw to catch and handle dimension errors"""
+        if not self._drawing_enabled:
+            return
+        try:
+            # Check if we have valid dimensions
+            size = self.get_width_height()
+            if size[0] > 10 and size[1] > 10:
+                super().draw()
+        except ValueError:
+            pass
+        except Exception:
+            pass
+    
+    def _draw_idle(self):
+        """Override _draw_idle to prevent automatic draw with zero dimensions"""
+        if not self._drawing_enabled:
+            return
+        try:
+            # Check if we have valid dimensions
+            size = self.get_width_height()
+            if size[0] > 10 and size[1] > 10:
+                super()._draw_idle()
+        except Exception:
+            # Catch everything to prevent console flood
+            pass
+
+    def draw_idle(self):
+        """Standard draw_idle override"""
+        if self._drawing_enabled:
+            self._draw_idle()
+
 
 
 class ChartWidget(QWidget):
@@ -14,20 +60,43 @@ class ChartWidget(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        # Set minimum size to prevent zero dimension errors
+        self.setMinimumSize(200, 150)
+        
         self.figure = Figure(figsize=(8, 6), dpi=100)
-        self.canvas = FigureCanvas(self.figure)
+        self.canvas = SafeFigureCanvas(self.figure)
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.canvas)
+        
+        # Enable drawing after a delay to ensure widget is sized
+        QTimer.singleShot(1000, self._enable_canvas)
+    
+    def _enable_canvas(self):
+        """Enable canvas drawing after delay"""
+        self.canvas.enable_drawing()
+    
+    def showEvent(self, event):
+        """Called when widget is shown"""
+        super().showEvent(event)
+        # Enable drawing slightly after show
+        QTimer.singleShot(500, self._enable_canvas)
     
     def clear(self):
         """Clear the figure"""
         self.figure.clear()
     
     def draw(self):
-        """Redraw the canvas"""
-        self.canvas.draw()
+        """Redraw the canvas with error handling"""
+        try:
+            if self.width() > 10 and self.height() > 10:
+                self.canvas.enable_drawing()
+                self.canvas.draw()
+        except ValueError:
+            pass
+        except Exception as e:
+            print(f"Chart draw error: {e}")
 
 
 class ChartGenerator:
@@ -53,7 +122,10 @@ class ChartGenerator:
             autotext.set_fontsize(10)
         
         ax.set_title(title, fontsize=14, fontweight='bold', pad=20)
-        ax.axis('equal')
+        try:
+            ax.axis('equal')
+        except (ValueError, Exception):
+            pass
         
         return figure
     
@@ -80,7 +152,10 @@ class ChartGenerator:
         if len(categories) > 5:
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
         
-        figure.tight_layout()
+        try:
+            figure.tight_layout()
+        except (ValueError, Exception):
+            pass
         return figure
     
     @staticmethod
@@ -103,7 +178,10 @@ class ChartGenerator:
         ax.set_ylabel(ylabel, fontsize=11)
         ax.grid(axis='x', alpha=0.3, linestyle='--')
         
-        figure.tight_layout()
+        try:
+            figure.tight_layout()
+        except (ValueError, Exception):
+            pass
         return figure
     
     @staticmethod
@@ -126,7 +204,10 @@ class ChartGenerator:
         if label:
             ax.legend()
         
-        figure.tight_layout()
+        try:
+            figure.tight_layout()
+        except (ValueError, Exception):
+            pass
         return figure
     
     @staticmethod
@@ -160,7 +241,10 @@ class ChartGenerator:
         ax.legend()
         ax.grid(axis='y', alpha=0.3, linestyle='--')
         
-        figure.tight_layout()
+        try:
+            figure.tight_layout()
+        except (ValueError, Exception):
+            pass
         return figure
 
 

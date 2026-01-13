@@ -67,8 +67,8 @@ class MainWindow(QMainWindow):
         from ui.backup_restore import BackupRestorePage
         from ui.user_management import UserManagementPage
         
-        # New Feature Imports
-        from ui.feature_launcher import FeatureLauncher
+        # Analytics Import (Keeping this one as requested)
+        from ui.advanced_analytics import AdvancedAnalyticsPage
         
         # Add tabs based on role
         user_role = self.user_data['role']
@@ -81,27 +81,26 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Error", "Student ID not found. Please contact administrator.")
                 return
             
-            self.tabs.addTab(StudentDashboard(self, student_id), "📊 My Dashboard")
-            self.tabs.addTab(MyResultsPage(self, student_id), "📋 My Results")
-            self.tabs.addTab(MyProfilePage(self, student_id, self.user_data), "👤 My Profile")
-            # Extra Features
-            self.tabs.addTab(FeatureLauncher(self.user_data), "🚀 Extra Features")
+            self.tabs.addTab(StudentDashboard(self, student_id), "\U0001F4CA My Dashboard")
+            self.tabs.addTab(MyResultsPage(self, student_id), "\U0001F4CB My Results")
+            self.tabs.addTab(MyProfilePage(self, student_id, self.user_data), "\U0001F464 My Profile")
+            
+            # Keeping core student tabs
         
         # TEACHER ROLE - Department data only
         elif user_role == 'Teacher':
             assigned_subject_id = self.user_data.get('assigned_subject_id')
             
             if department_id:
-                self.tabs.addTab(TeacherDashboard(self, department_id), "📊 My Dashboard")
+                self.tabs.addTab(TeacherDashboard(self, department_id), "\U0001F4CA My Dashboard")
             else:
-                self.tabs.addTab(ModernDashboard(self), "📊 Dashboard")
+                self.tabs.addTab(ModernDashboard(self), "\U0001F4CA Dashboard")
             
             # Students (filtered by department)
             self.tabs.addTab(StudentManagementPage(self, department_id), "👥 My Students")
             
             # Only show Courses tab if teacher doesn't have an assigned subject
             if not assigned_subject_id:
-                # Courses (filtered by department)
                 self.tabs.addTab(CourseManagementPage(self, department_id), "📚 Courses")
             
             # Marks Entry (filtered by department)
@@ -112,37 +111,38 @@ class MainWindow(QMainWindow):
             
             # Only show Reports tab if teacher doesn't have an assigned subject
             if not assigned_subject_id:
-                # Reports (filtered by department)
                 self.tabs.addTab(ReportsPage(self, department_id), "📈 Reports")
-                
-            # Extra Features
-            self.tabs.addTab(FeatureLauncher(self.user_data), "🚀 Extra Features")
+            
+            # Keeping core teacher tabs
+            self.tabs.addTab(AdvancedAnalyticsPage(self.user_data), "\U0001F4CA Analytics")
         
         # ADMIN & DATAENTRY ROLES - Full access
         else:
             # Dashboard (all users)
-            self.tabs.addTab(ModernDashboard(self), "📊 Dashboard")
+            self.tabs.addTab(ModernDashboard(self), "\U0001F4CA Dashboard")
             
             # All roles can view these
-            self.tabs.addTab(StudentManagementPage(self), "👥 Students")
-            self.tabs.addTab(DepartmentManagementPage(self), "🏛️ Departments")
-            self.tabs.addTab(CourseManagementPage(self), "📚 Courses")
+            self.tabs.addTab(StudentManagementPage(self), "\U0001F465 Students")
+            self.tabs.addTab(DepartmentManagementPage(self), "\U0001F3DB Departments")
+            self.tabs.addTab(CourseManagementPage(self), "\U0001F4DA Courses")
             
             # DataEntry and Admin can enter marks
             if user_role in ['Admin', 'DataEntry']:
-                self.tabs.addTab(MarksEntryPage(self), "✏️ Marks Entry")
-                self.tabs.addTab(ResultGenerationPage(self), "📋 Results")
+                self.tabs.addTab(MarksEntryPage(self), "\u270F\uFE0F Marks Entry")
+                self.tabs.addTab(ResultGenerationPage(self), "\U0001F4CB Results")
             
             # All roles can view reports
             self.tabs.addTab(ReportsPage(self), "📈 Reports")
+            
+            # Core Analytics for Admin/DataEntry
+            self.tabs.addTab(AdvancedAnalyticsPage(self.user_data), "\U0001F4CA Analytics")
             
             # Admin only features
             if user_role == 'Admin':
                 self.tabs.addTab(BackupRestorePage(self), "💾 Backup")
                 self.tabs.addTab(UserManagementPage(self), "👤 Users")
                 
-                # Feature Launcher (New)
-                self.tabs.addTab(FeatureLauncher(self.user_data), "🚀 Extra Features")
+                # Keeping core admin tabs
         
         main_layout.addWidget(self.tabs)
         
@@ -196,7 +196,7 @@ class MainWindow(QMainWindow):
         # Theme toggle button
         from utils.theme_manager import theme_manager
         current_theme = theme_manager.get_current_theme()
-        theme_text = "☀️ Light Mode" if current_theme == 'Dark' else "🌙 Dark Mode"
+        theme_text = "\u2600\uFE0F Light Mode" if current_theme == 'Dark' else "\U0001F319 Dark Mode"
         
         self.theme_btn = QPushButton(theme_text)
         self.theme_btn.setStyleSheet("""
@@ -217,7 +217,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.theme_btn)
         
         # Logout button
-        logout_btn = QPushButton("🚪 Logout")
+        logout_btn = QPushButton("\U0001F6AA Logout")
         logout_btn.setStyleSheet("""
             QPushButton {
                 background-color: rgba(255, 255, 255, 0.1);

@@ -2,7 +2,7 @@
 Enhanced Dashboard with Visual Charts and Analytics
 """
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
 from controllers.student_controller import student_controller
 from controllers.department_controller import department_controller
@@ -14,7 +14,8 @@ class DashboardEnhanced(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.init_ui()
-        self.load_dashboard_data()
+        # Delay loading to ensure widget has valid dimensions
+        QTimer.singleShot(1500, self.load_dashboard_data)
     
     def init_ui(self):
         layout = QVBoxLayout(self)
