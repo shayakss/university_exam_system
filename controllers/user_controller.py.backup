@@ -1,0 +1,364 @@
+"""
+User Controller - Manages user CRUD operations
+"""
+from database.db_manager import DatabaseManager
+from utils.security import hash_password, verify_password
+
+
+class UserController:
+    """Handles user management operations"""
+    
+    def __init__(self):
+        self.db = DatabaseManager()
+    
+    def get_all_users(self):
+        """Get all users"""
+        query = """
+            SELECT user_id, username, full_name, role, created_at, is_active
+            FROM users
+            ORDER BY created_at DESC
+        """
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        
+        columns = [description[0] for description in cursor.description]
+        results = []
+        for row in cursor.fetchall():
+            results.append(dict(zip(columns, row)))
+        
+        return results
+    
+    def get_user_by_id(self, user_id):
+        """Get user by ID"""
+        query = "SELECT * FROM users WHERE user_id = ?"
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (user_id,))
+        
+        row = cursor.fetchone()
+        result = None
+        if row:
+            columns = [description[0] for description in cursor.description]
+            result = dict(zip(columns, row))
+        
+        return result
+    
+    def get_user_by_username(self, username):
+        """Get user by username"""
+        query = "SELECT * FROM users WHERE username = ?"
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (username,))
+        
+        row = cursor.fetchone()
+        result = None
+        if row:
+            columns = [description[0] for description in cursor.description]
+            result = dict(zip(columns, row))
+        
+        return result
+    
+    def create_user(self, username, password, full_name, role='Viewer', email=None, department_id=None, roll_number=None):
+        """Create a new user"""
+        # Check if username already exists
+        if self.get_user_by_username(username):
+            return False, "Username already exists", None
+        
+        # Validate role
+        valid_roles = ['Admin', 'DataEntry', 'Viewer', 'Teacher', 'Student']
+        if role not in valid_roles:
+            return False, f"Invalid role. Must be one of: {', '.join(valid_roles)}", None
+        
+        # Email is required for Teacher and Student roles
+        if role in ['Teacher', 'Student']:
+            if not email or not email.strip():
+                return False, f"Email is required for {role} role", None
+            
+            # Validate email format
+            from utils.validators import validate_email
+            is_valid, msg = validate_email(email)
+            if not is_valid:
+                return False, msg, None
+        
+        # Department is required for Teacher role
+        if role == 'Teacher' and not department_id:
+            return False, "Department is required for Teacher role", None
+        
+        # Roll number is required for Student role
+        student_id = None
+        if role == 'Student':
+            if not roll_number or not roll_number.strip():
+                return False, "Roll number is required for Student role", None
+            
+            # Find student by roll number
+            from controllers.student_controller import student_controller
+            students = student_controller.search_students(roll_number)
+            
+            matching_student = None
+            for student in students:
+                if student['roll_number'].lower() == roll_number.lower().strip():
+                    matching_student = student
+                    break
+            
+            if not matching_student:
+                return False, f"No student found with roll number: {roll_number}", None
+            
+            student_id = matching_student['student_id']
+            
+            # Check if student already has a user account
+            existing = self.db.get_connection().cursor()
+            existing.execute("SELECT user_id FROM users WHERE student_id = ?", (student_id,))
+            if existing.fetchone():
+                return False, "This student already has a user account", None
+        
+        # Validate password strength
+        from utils.validators import validate_password_strength
+        is_valid, msg = validate_password_strength(password)
+        if not is_valid:
+            return False, msg, None
+        
+        # Hash password
+        hashed_password = hash_password(password)
+        
+        query = """
+            INSERT INTO users (username, password_hash, full_name, role, email, department_id, student_id, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+        """
+        
+        try:
+            success, user_id = self.db.execute_update(query, (username, hashed_password, full_name, role, email, department_id, student_id))
+            if success:
+                return True, "User created successfully", user_id
+            else:
+                return False, "Failed to create user", None
+        except Exception as e:
+            return False, f"Failed to create user: {str(e)}", None
+"""
+User Controller - Manages user CRUD operations
+"""
+from database.db_manager import DatabaseManager
+from utils.security import hash_password, verify_password
+
+
+class UserController:
+    """Handles user management operations"""
+    
+    def __init__(self):
+        self.db = DatabaseManager()
+    
+    def get_all_users(self):
+        """Get all users"""
+        query = """
+            SELECT user_id, username, full_name, role, created_at, is_active
+            FROM users
+            ORDER BY created_at DESC
+        """
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        
+        columns = [description[0] for description in cursor.description]
+        results = []
+        for row in cursor.fetchall():
+            results.append(dict(zip(columns, row)))
+        
+        return results
+    
+    def get_user_by_id(self, user_id):
+        """Get user by ID"""
+        query = "SELECT * FROM users WHERE user_id = ?"
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (user_id,))
+        
+        row = cursor.fetchone()
+        result = None
+        if row:
+            columns = [description[0] for description in cursor.description]
+            result = dict(zip(columns, row))
+        
+        return result
+    
+    def get_user_by_username(self, username):
+        """Get user by username"""
+        query = "SELECT * FROM users WHERE username = ?"
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (username,))
+        
+        row = cursor.fetchone()
+        result = None
+        if row:
+            columns = [description[0] for description in cursor.description]
+            result = dict(zip(columns, row))
+        
+        return result
+    
+    def create_user(self, username, password, full_name, role='Viewer', email=None, department_id=None, roll_number=None):
+        """Create a new user"""
+        # Check if username already exists
+        if self.get_user_by_username(username):
+            return False, "Username already exists", None
+        
+        # Validate role
+        valid_roles = ['Admin', 'DataEntry', 'Viewer', 'Teacher', 'Student']
+        if role not in valid_roles:
+            return False, f"Invalid role. Must be one of: {', '.join(valid_roles)}", None
+        
+        # Email is required for Teacher and Student roles
+        if role in ['Teacher', 'Student']:
+            if not email or not email.strip():
+                return False, f"Email is required for {role} role", None
+            
+            # Validate email format
+            from utils.validators import validate_email
+            is_valid, msg = validate_email(email)
+            if not is_valid:
+                return False, msg, None
+        
+        # Department is required for Teacher role
+        if role == 'Teacher' and not department_id:
+            return False, "Department is required for Teacher role", None
+        
+        # Roll number is required for Student role
+        student_id = None
+        if role == 'Student':
+            if not roll_number or not roll_number.strip():
+                return False, "Roll number is required for Student role", None
+            
+            # Find student by roll number
+            from controllers.student_controller import student_controller
+            students = student_controller.search_students(roll_number)
+            
+            matching_student = None
+            for student in students:
+                if student['roll_number'].lower() == roll_number.lower().strip():
+                    matching_student = student
+                    break
+            
+            if not matching_student:
+                return False, f"No student found with roll number: {roll_number}", None
+            
+            student_id = matching_student['student_id']
+            
+            # Check if student already has a user account
+            existing = self.db.get_connection().cursor()
+            existing.execute("SELECT user_id FROM users WHERE student_id = ?", (student_id,))
+            if existing.fetchone():
+                return False, "This student already has a user account", None
+        
+        # Validate password strength
+        from utils.validators import validate_password_strength
+        is_valid, msg = validate_password_strength(password)
+        if not is_valid:
+            return False, msg, None
+        
+        # Hash password
+        hashed_password = hash_password(password)
+        
+        query = """
+            INSERT INTO users (username, password_hash, full_name, role, email, department_id, student_id, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+        """
+        
+        try:
+            success, user_id = self.db.execute_update(query, (username, hashed_password, full_name, role, email, department_id, student_id))
+            if success:
+                return True, "User created successfully", user_id
+            else:
+                return False, "Failed to create user", None
+        except Exception as e:
+            return False, f"Failed to create user: {str(e)}", None
+    
+    def update_user(self, user_id, username, full_name, role, is_active=1):
+        """Update user details (without password)"""
+        # Check if username is taken by another user
+        existing = self.get_user_by_username(username)
+        if existing and existing['user_id'] != user_id:
+            return False, "Username already taken by another user"
+        
+        # Validate role
+        valid_roles = ['Admin', 'DataEntry', 'Viewer', 'Teacher', 'Student']
+        if role not in valid_roles:
+            return False, f"Invalid role. Must be one of: {', '.join(valid_roles)}"
+        
+        query = """
+            UPDATE users
+            SET username = ?, full_name = ?, role = ?, is_active = ?
+            WHERE user_id = ?
+        """
+        
+        try:
+            success, _ = self.db.execute_update(query, (username, full_name, role, is_active, user_id))
+            if success:
+                return True, "User updated successfully"
+            else:
+                return False, "Failed to update user"
+        except Exception as e:
+            return False, f"Failed to update user: {str(e)}"
+    
+    def update_user_password(self, user_id, new_password):
+        """Update user's password"""
+        # Validate password strength
+        from utils.validators import validate_password_strength
+        is_valid, msg = validate_password_strength(new_password)
+        if not is_valid:
+            return False, msg
+        
+        hashed_password = hash_password(new_password)
+        query = "UPDATE users SET password_hash = ? WHERE user_id = ?"
+        
+        try:
+            success, _ = self.db.execute_update(query, (hashed_password, user_id))
+            if success:
+                return True, "Password updated successfully"
+            else:
+                return False, "Failed to update password"
+        except Exception as e:
+            return False, f"Failed to update password: {str(e)}"
+    
+    def delete_user(self, user_id):
+        """Delete a user (soft delete by setting is_active to 0)"""
+        query = "UPDATE users SET is_active = 0 WHERE user_id = ?"
+        
+        try:
+            success, _ = self.db.execute_update(query, (user_id,))
+            if success:
+                return True, "User deactivated successfully"
+            else:
+                return False, "Failed to deactivate user"
+        except Exception as e:
+            return False, f"Failed to deactivate user: {str(e)}"
+    
+    def verify_user_credentials(self, username, password):
+        """Verify user credentials for login"""
+        user = self.get_user_by_username(username)
+        if user and user['is_active'] == 1:
+            if verify_password(password, user['password_hash']):
+                return True, user
+        return False, None
+    
+    def get_user_count_by_role(self):
+        """Get count of users by role"""
+        query = """
+            SELECT role, COUNT(*) as count
+            FROM users
+            WHERE is_active = 1
+            GROUP BY role
+        """
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        
+        columns = [description[0] for description in cursor.description]
+        results = []
+        for row in cursor.fetchall():
+            results.append(dict(zip(columns, row)))
+        
+        # Don't close the singleton connection
+        return results
+
+
+# Global user controller instance
+user_controller = UserController()
